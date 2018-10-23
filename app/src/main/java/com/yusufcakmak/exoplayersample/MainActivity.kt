@@ -9,6 +9,7 @@ class MainActivity : AppCompatActivity() {
 
     private val radioPlayerButton: Button by lazy { findViewById<Button>(R.id.button_radio_player) }
     private val videoPlayerButton: Button by lazy { findViewById<Button>(R.id.button_video_player) }
+    private val videoPlayerV2Button: Button by lazy { findViewById<Button>(R.id.button_video_playerV2) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +28,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        videoPlayerV2Button.setOnClickListener {
+            val intent = Intent(this@MainActivity, VideoPlayerV2Activity::class.java)
+            startActivity(intent)
+        }
 
     }
 
