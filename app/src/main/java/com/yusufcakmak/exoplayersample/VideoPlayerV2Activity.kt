@@ -72,7 +72,9 @@ class VideoPlayerV2Activity : AppCompatActivity() {
         )
             .createMediaSource(Uri.parse("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"))
 
-        player?.prepare(mediaSource, true, false)
+        player?.prepare(mediaSource, false, false)
+
+        player?.playWhenReady = true
     }
 
     private fun releasePlayer() {
