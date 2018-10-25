@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:focusable="true"
@@ -8,10 +8,10 @@
     android:keepScreenOn="true">
 
     <com.google.android.exoplayer2.ui.PlayerView
-        android:id="@+id/player_view"
+        android:id="@+id/player_view2"
         app:controller_layout_id="@layout/empty"
         android:focusable="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</FrameLayout>
+</android.support.constraint.ConstraintLayout>

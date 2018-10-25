@@ -6,12 +6,15 @@ import android.view.ViewGroup
 import com.netflix.elfo.ElfoView
 import com.yusufcakmak.exoplayersample.R
 
-class LoadingUIView<T>(container: ViewGroup) : ElfoView<T>(container) {
+class PrimaryControlsUIView<T>(container: ViewGroup) : ElfoView<T>(container) {
     private val uiView: View =
-        LayoutInflater.from(container.context).inflate(R.layout.loading, container, true)
-            .findViewById(R.id.loadingSpinner)
+        LayoutInflater.from(container.context).inflate(R.layout.primary_controls, container, false)
 
-    override val containerId: Int = 0
+    init {
+        container.addView(uiView)
+    }
+
+    override val containerId: Int = uiView.id
 
     override fun show() {
         uiView.visibility = View.VISIBLE
