@@ -1,11 +1,11 @@
 package com.yusufcakmak.exoplayersample
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.v7.app.AppCompatActivity
-import android.view.ViewGroup
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -24,26 +24,67 @@ import java.util.concurrent.TimeUnit
 class VideoPlayerV2Activity : AppCompatActivity() {
     private var player: SimpleExoPlayer? = null
     private val playerView: PlayerView by lazy { findViewById<PlayerView>(R.id.player_view2) }
+    private lateinit var primaryControlsUIView: PrimaryControlsUIView<PlayerEvents>
+    private lateinit var playbackSurfaceUIView: PlaybackSurfaceUIView<PlayerEvents>
 
+    @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player_v2)
         val rootViewContainer = findViewById<ConstraintLayout>(R.id.root)
 
+        initializeUIComponents(rootViewContainer)
+        layoutUIComponents(rootViewContainer)
+
+        EventBusFactory.get(this).getSafeManagedObservable(PlayerUserInteractionEvents::class.java)
+            .subscribe { event ->
+                when (event) {
+                    PlayerUserInteractionEvents.IntentPlayPauseClicked -> {
+                        player?.playWhenReady = !player?.playWhenReady!!
+                    }
+                    PlayerUserInteractionEvents.IntentRwClicked -> {
+                        player?.seekTo(player?.currentPosition!! - 30)
+                    }
+                    PlayerUserInteractionEvents.IntentFwClicked -> {
+                        player?.seekTo(player?.currentPosition!! + 30)
+                    }
+                }
+            }
+    }
+
+    private fun initializeUIComponents(rootViewContainer: ConstraintLayout) {
+
+        playbackSurfaceUIView = PlaybackSurfaceUIView(rootViewContainer)
+        PlaybackSurfacePresenter(playbackSurfaceUIView, EventBusFactory.get(this))
+
+        // Player controls UI component
+        primaryControlsUIView = PrimaryControlsUIView(rootViewContainer, EventBusFactory.get(this))
+        PrimaryControlsPresenter(primaryControlsUIView, EventBusFactory.get(this))
+
+        // Loading UI component
         LoadingPresenter(
             LoadingUIView(rootViewContainer),
             EventBusFactory.get(this)
         )
+    }
 
-        val primaryControlsUIView = PrimaryControlsUIView<PlayerEvents>(rootViewContainer)
-        PrimaryControlsPresenter(primaryControlsUIView, EventBusFactory.get(this))
-
+    private fun layoutUIComponents(rootViewContainer: ConstraintLayout) {
         // Create a constraintSet and clone it from the main container
         val mainContainerConstraintSet = ConstraintSet()
         mainContainerConstraintSet.clone(rootViewContainer)
 
-        mainContainerConstraintSet.connect(primaryControlsUIView.containerId, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
-        mainContainerConstraintSet.connect(primaryControlsUIView.containerId, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+        mainContainerConstraintSet.connect(
+            primaryControlsUIView.containerId,
+            ConstraintSet.TOP,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.TOP
+        )
+        mainContainerConstraintSet.connect(
+            primaryControlsUIView.containerId,
+            ConstraintSet.BOTTOM,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.BOTTOM
+        )
 
         // Apply the constraints from all UI components to the parent
         mainContainerConstraintSet.applyTo(rootViewContainer)
@@ -83,7 +124,7 @@ class VideoPlayerV2Activity : AppCompatActivity() {
 
         // artificial delay to simulate a network request
         Observable.just(Any())
-            .delay(1, TimeUnit.SECONDS)
+            .delay(10, TimeUnit.SECONDS)
             .doOnNext {
                 val mediaSource = ExtractorMediaSource.Factory(
                     DefaultDataSourceFactory(
@@ -95,8 +136,6 @@ class VideoPlayerV2Activity : AppCompatActivity() {
                 player?.prepare(mediaSource, false, false)
             }
             .subscribe()
-
-
 
         player?.playWhenReady = true
     }
@@ -118,11 +157,16 @@ class VideoPlayerV2Activity : AppCompatActivity() {
                 // The player is buffering (loading the content)
                 Player.STATE_BUFFERING -> {
                     emit<LoadingEvents>(LoadingEvents.Loading)
+                    emit<PlayerEvents>(PlayerEvents.Buffering)
                 }
                 // The player is able to immediately play
                 Player.STATE_READY -> {
                     emit<LoadingEvents>(LoadingEvents.Loaded)
-                    emit<PlayerEvents>(PlayerEvents.PlayStarted)
+                    if (playWhenReady) {
+                        emit<PlayerEvents>(PlayerEvents.PlayStarted)
+                    } else {
+                        emit<PlayerEvents>(PlayerEvents.Paused)
+                    }
                 }
                 // The player has finished playing the media
                 Player.STATE_ENDED -> {

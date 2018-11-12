@@ -17,9 +17,11 @@ class PrimaryControlsPresenter<T>(uiView: PrimaryControlsUIView<T>, bus: EventBu
                         }
                         PlayerEvents.PlayStarted -> {
                             uiView.show()
+                            uiView.setPlayPauseImageResource(true)
                         }
                         PlayerEvents.Paused -> {
                             uiView.show()
+                            uiView.setPlayPauseImageResource(false)
                         }
                     }
                 },

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/player_view2"
+        android:visibility="invisible"
+        app:controller_layout_id="@layout/empty"
+        android:focusable="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</merge>
